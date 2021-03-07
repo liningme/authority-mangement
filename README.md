@@ -3,23 +3,38 @@
 #### 介绍
 [模块] 部门、用户、菜单、角色、日志等管理模块
 [完成]
-1、使用SSM框架完成对部门、用户、菜单、角色的增删改查。
-2、使用AspectJ实现AOP异步记录日志，记录用户的操作，并将其存储到数据库。
-3、使用Apache Shiro框架实现用户身份认证，权限授权、加密、会话管理等功能。
+1.  使用SSM框架完成对部门、用户、菜单、角色的增删改查。
+1.  使用AspectJ实现AOP异步记录日志，记录用户的操作，并将其存储到数据库。
+1.  使用Apache Shiro框架实现用户身份认证，权限授权、加密、会话管理等功能。
 
 #### 软件架构
  SpringBoot + Spring MVC + MyBatis + MySQL +Thymeleaf + Ajax+ jQuery + Shiro+zTree
 
 
 #### 业务实现
+
+##### 使用AspectJ实现AOP异步记录日志
+~~~~
+1 Entity 类实现ip，username，operation，method，params，time，createdTime）
+2 Dao 接口实现
+基于业务层参数数据查询日志记录总数以及当前页要呈现的用户行为日志信息。
+3 Mapper 文件实现
+
+
+
+~~~~
+
+
+
+
+
 ##### Shiro 框架认证业务实现？ -- 判断用户身份的合法性。
 ~~~~
 1)客户端提交用户名和密码。
-2)在服务端的Controller对象中获取用户名和密码？
+2)在服务端的Controller对象中获取用户名和密码。
 3)将用户名和密码封装到token对象，然后交给subject对象。
 4)Subject对象将token提交给谁securityManager对象
-5)SecurityManager对象调用realm基于客户端提交的用户信息，查询数据库中对应的用户
-信息并进行封装，将封装信息返回给SecurityManager对象。
+5)SecurityManager对象调用realm基于客户端提交的用户信息，查询数据库中对应的用户信息并进行封装，将封装信息返回给SecurityManager对象。
 6)SecurityManager对象基于客户端提交的信息以及数据查询到信息进行用户身份认证
 7)认证不通过要回到登录页面进行重新认证。
 ~~~~
@@ -42,7 +57,7 @@
 
 
 
-##### Shiro 记住用户登录状态？     
+##### Shiro 记住用户登录状态？ -- “记住我”功能
 ~~~~
 1)在Shiro的配置类中，添加RememberMeManager对象的配置，并且会为此对象注入一个Cookie对象。
 2)将RememberMeManager对象注入给SecurityManager对象(因为此对象负责实现用户认证。认证以后可以通过此对象获取RememberMeManager，进而拿到Cookie对象，将用户信息在Cookie中做一个记录)

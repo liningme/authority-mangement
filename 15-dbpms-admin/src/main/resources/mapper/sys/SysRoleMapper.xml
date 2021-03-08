@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysRoleDao">
+
+    <!--更新角色自身信息-->
+    <update id="updateObject" parameterType="com.cy.pj.sys.pojo.SysRole">
+        update sys_roles
+        set name=#{name},
+            note=#{note},
+            modifiedTime=now(),
+            modifiedUser=#{modifiedUser}
+        where id=#{id}
+    </update>
+
+
+    <!--方案3：嵌套select查询-->
+    <resultMap id="sysRoleMenu" type="com.cy.pj.sys.pojo.SysRoleMenu">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <result property="note" column="note"></result>
+        <collection property="menuIds" ofType="integer" column="id"
+                    select="com.cy.pj.sys.dao.SysRoleMenuDao.findMenuIdsByRoleId"/>
+    </resultMap>
+    <select id="findById" resultMap="sysRoleMenu">
+           select id,name,note
+           from sys_roles r
+           where id=#{id}
+    </select>
+    <!--
+    方案2：数据层多表关联查询
+    resultMap是mybatis中用于实现高级映射的一个元素，应用场景
+    1)表中字段与pojo中的set方法不匹配
+    2)多表关联查询
+    3)表嵌套查询(select中还有select)
+    <resultMap id="sysRoleMenu" type="com.cy.pj.sys.pojo.SysRoleMenu">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <result property="note" column="note"></result>
+        <collection property="menuIds"
+                    ofType="integer">
+              <result column="menu_id"/>
+        </collection>
+    </resultMap>
+    <select id="findById" resultMap="sysRoleMenu">
+        select r.id,r.name name,r.note,rm.menu_id
+        from sys_roles r left join sys_role_menus rm
+        on r.id=rm.role_id
+        where r.id=#{id}
+    </select>
+    -->
+    <!--方案1：业务层发起多次单表查询(一张表一张的查询)
+    <select id="findById" resultType="com.cy.pj.sys.pojo.SysRoleMenu" >
+           select id,name,note
+           from sys_roles
+           where id=#{id}
+    </select>
+    -->
+
+    <!--保存角色自身信息
+    1)useGeneratedKeys 表示要使用我们这次insert操作自动生成的主键值,
+    2)keyProperty表示将拿到的主键值赋值给参数对象SysRole的id属性
+    -->
+    <insert id="insertObject"  parameterType="com.cy.pj.sys.pojo.SysRole"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        insert into sys_roles
+        (name,note,createdTime,modifiedTime,createdUser,modifiedUser)
+        values
+        (#{name},#{note},now(),now(),#{createdUser},#{modifiedUser})
+    </insert>
+
+    <!--sql元素用于定义映射文件中共性语句，其它映射语句中用到了这部分内容
+     ，可以用include元素进行包含-->
+    <sql id="queryWhereId">
+        from sys_roles
+        <where>
+            <if test="name!=null and name!=''">
+                name like concat("%",#{name},"%")
+            </if>
+        </where>
+    </sql>
+
+    <select id="getRowCount" resultType="int">
+          select count(*)
+          <include refid="queryWhereId"></include>
+    </select>
+    <!--分页查询当前页数据，这里的resultType为一行记录要映射的结果类型-->
+    <select id="findPageObjects" resultType="com.cy.pj.sys.pojo.SysRole">
+          select *
+          <include refid="queryWhereId"></include>
+          order by createdTime desc
+          limit #{startIndex},#{pageSize}
+    </select>
+
+</mapper>

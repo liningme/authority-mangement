@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysMenuDao">
+
+    <resultMap id="sysUserMenu" type="com.cy.pj.sys.pojo.SysUserMenu">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="url" column="url"/>
+        <collection property="childs" ofType="com.cy.pj.sys.pojo.SysUserMenu">
+            <id property="id" column="sid"/>
+            <result property="name" column="sname"/>
+            <result property="url" column="surl"/>
+        </collection>
+    </resultMap>
+    <select id="findMenusByIds" resultMap="sysUserMenu">
+        select f.id,f.name,f.url,s.id sid,s.name sname,s.url surl
+        from sys_menus f left join sys_menus s
+        on s.parentId=f.id
+        where f.parentId is null and s.id in
+        <foreach collection="menuIds" open="(" close=")" separator="," item="menuId">
+            #{menuId}
+        </foreach>
+    </select>
+
+    <select id="findPermissions" resultType="string">
+         select permission
+         from sys_menus
+         where id in
+         <foreach collection="menuIds" open="(" close=")" separator="," item="menuId">
+             #{menuId}
+         </foreach>
+    </select>
+
+      <update id="updateObject">
+update sys_menus
+ set
+ name=#{name},
+ type=#{type},
+ sort=#{sort},
+ url=#{url},
+ parentId=#{parentId},
+ permission=#{permission},
+ modifiedUser=#{modifiedUser},
+ modifiedTime=now()
+ where id=#{id}
+      </update>
+
+      <insert id="insertObject">
+        insert into sys_menus
+            (name,url,type,sort,note,parentId,permission,
+            createdTime,modifiedTime,createdUser,modifiedUser)
+        values
+            (#{name},#{url},#{type},#{sort},#{note},#{parentId},
+            #{permission},now(),now(),#{createdUser},#{modifiedUser})
+      </insert>
+      <!--查询所有菜单，以及上级菜单对应的菜单名称-->
+      <select id="findObjects" resultType="map">
+          <!--方案 1-嵌套查询-->
+           select c.*,(select name
+                       from sys_menus p
+                       where c.parentId=p.id) parentName
+           from sys_menus c
+
+           <!--方案 2-表关联查询-->
+           <!--
+           select c.*,p.name parentName
+           from sys_menus c left join sys_menus p
+           on c.parentId=p.id
+           -->
+      </select>
+
+
+
+</mapper>

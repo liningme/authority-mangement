@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysLogDao">
+
+    <select id="findPageObjects" resultType="com.cy.pj.sys.pojo.SysLog">
+        select *
+        from sys_logs
+        <where>
+            <if test="username!=null and username!=''">
+                username like concat("%",#{username},"%")
+            </if>
+        </where>
+        order by createdTime desc
+    </select>
+
+   <insert id="insertObject">
+       insert into sys_logs
+       (ip,username,operation,method,params,time,createdTime)
+       values
+       (#{ip},#{username},#{operation},#{method},#{params},#{time},#{createdTime})
+   </insert>
+
+</mapper>
